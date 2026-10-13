@@ -6,3 +6,4 @@ out
 .env*.local
 tests/output
 next-env.d.ts
+*.tsbuildinfo
