@@ -2,6 +2,9 @@
 //   npm run build && npx next start -p 3000 &   then   npm run test:e2e
 // SITE_URL overrides the target (for example a Vercel preview URL).
 // CHROMIUM_PATH points at a Chromium binary when Playwright's own is not installed.
+// VERCEL_AUTOMATION_BYPASS_SECRET (from the environment only) lets the checks reach a
+// protected Vercel preview. It is sent as x-vercel-protection-bypass to SITE_URL's
+// origin only, and is never printed.
 import { createRequire } from "node:module";
 import fs from "node:fs";
 
@@ -10,6 +13,29 @@ const { chromium } = require("playwright-core");
 const AXE = fs.readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
 const URL = process.env.SITE_URL ?? "http://127.0.0.1:3000/";
 const SHOTS = "tests/output";
+const ORIGIN = new globalThis.URL(URL).origin;
+const BYPASS = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || "";
+// Adds the bypass header to requests for the site under test, and to nothing else.
+async function withBypass(c) {
+  if (!BYPASS) return;
+  await c.route(
+    (u) => u.origin === ORIGIN,
+    (r) => r.continue({ headers: { ...r.request().headers(), "x-vercel-protection-bypass": BYPASS } }),
+  );
+}
+{
+  const local = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/.test(URL);
+  const res = await fetch(URL, { redirect: "manual", headers: BYPASS ? { "x-vercel-protection-bypass": BYPASS } : {} });
+  console.log(`target ${ORIGIN} | bypass secret ${BYPASS ? "received from environment" : "not set"} | preflight HTTP ${res.status}`);
+  if (res.status !== 200) {
+    console.error(
+      local || BYPASS
+        ? "Preflight did not return 200. Check SITE_URL and that the bypass secret belongs to this project."
+        : "The site redirected or refused the request. For a protected Vercel preview, export VERCEL_AUTOMATION_BYPASS_SECRET.",
+    );
+    process.exit(2);
+  }
+}
 fs.mkdirSync(SHOTS, { recursive: true });
 
 const out = [];
@@ -21,6 +47,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 
 async function ctx(opts) {
   const c = await browser.newContext(opts);
+  await withBypass(c);
   const p = await c.newPage();
   const errors = [];
   p.on("pageerror", (e) => errors.push(String(e)));
@@ -187,6 +214,7 @@ for (const [label, vp, mobile] of [
 }
 {
   const c = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  await withBypass(c);
   const p = await c.newPage();
   await p.goto(URL);
   const s = await p.evaluate(() => ({ dishes: document.querySelectorAll(".dish").length, call: document.querySelector(".action-bar .call")?.getAttribute("href"), ov: document.documentElement.scrollWidth - innerWidth }));
