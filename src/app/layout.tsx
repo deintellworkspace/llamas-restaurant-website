@@ -2,10 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import type { ReactNode } from "react";
 import { BOOT_SCRIPT } from "@/components/llamas/motion";
+import "./base.css";
 import "./llamas.css";
 
+// Fraunces is only ever set at 700, so the variable font with optical sizing renders
+// the same as the 600/700 faces the Higgsfield site loaded.
 const fraunces = Fraunces({ subsets: ["latin"], axes: ["opsz"], variable: "--font-fraunces", display: "swap" });
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
+// Manrope 500 to 800 only, as on the Higgsfield site: body text set at 400 renders
+// with the 500 face there, so it must here too.
+const manrope = Manrope({ subsets: ["latin"], weight: ["500", "600", "700", "800"], variable: "--font-manrope", display: "swap" });
 
 // Vercel sets this on every build; it gives share images an absolute URL.
 const host = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
