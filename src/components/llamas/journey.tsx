@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, type ReactNode } from "react";
 import { HERO, MEDIA, src, srcSet } from "../../content/media";
 import { SITE, TEL } from "../../content/site";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { HERO } from "../../content/media";
 import { ADDRESS_ONE_LINE, SITE, TEL } from "../../content/site";

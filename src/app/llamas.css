@@ -4,8 +4,8 @@
   --red: #c62828; --red-deep: #9e1f1f; --yellow: #f4c542; --ivory: #fff8ee;
   --ivory-2: #f6ecdd; --ink: #1d1a17; --ink-2: #5a4f45;
   --on-dark: #fff8ee; --on-dark-2: rgba(255, 248, 238, 0.78); --line-dark: rgba(255, 248, 238, 0.16);
-  --display: "Fraunces", Georgia, "Times New Roman", serif;
-  --body: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: var(--font-fraunces), "Fraunces", Georgia, "Times New Roman", serif;
+  --body: var(--font-manrope), "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --gutter: clamp(16px, 4vw, 56px); --header-h: 64px; --bar-h: 0px;
   --radius: 14px;
 }

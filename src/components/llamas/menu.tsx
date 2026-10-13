@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MEDIA, src } from "../../content/media";
 import { MENU, type MenuItem } from "../../content/menu";
@@ -314,7 +316,7 @@ export function Footer() {
 }
 
 // One delegated listener for every link marked with data-track.
-export function useClickTracking() {
+function useClickTracking() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const a = (e.target as Element | null)?.closest<HTMLElement>("[data-track]");
@@ -328,4 +330,10 @@ export function useClickTracking() {
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
   }, []);
+}
+
+// Mounts the delegated click listener from a server-rendered page.
+export function ClickTracking() {
+  useClickTracking();
+  return null;
 }
